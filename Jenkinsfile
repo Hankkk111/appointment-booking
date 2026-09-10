@@ -7,27 +7,13 @@ pipeline {
     }
 
     stages {
-        stage('Backend: Restore & Build') {
+        stage('Backend: Restore, Build & Test') {
             steps {
                 script {
                     docker.image('mcr.microsoft.com/dotnet/sdk:8.0').inside {
                         dir('backend') {
                             sh 'dotnet restore'
                             sh 'dotnet build --no-restore -c Release'
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Backend: Test') {
-            steps {
-                script {
-                    docker.image('mcr.microsoft.com/dotnet/sdk:8.0').inside {
-                        dir('backend') {
-                            // dotnet test exits non-zero on any failing test, which
-                            // fails this stage (and therefore the whole pipeline)
-                            // automatically -- no extra result-parsing plugin needed.
                             sh 'dotnet test --no-restore -c Release'
                         }
                     }
@@ -35,24 +21,13 @@ pipeline {
             }
         }
 
-        stage('Frontend: Install & Test') {
+        stage('Frontend: Install, Test & Build') {
             steps {
                 script {
                     docker.image('node:20').inside {
                         dir('frontend') {
                             sh 'npm ci'
                             sh 'npm test'
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Frontend: Build') {
-            steps {
-                script {
-                    docker.image('node:20').inside {
-                        dir('frontend') {
                             sh 'npm run build'
                         }
                     }
