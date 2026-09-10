@@ -1,0 +1,5 @@
+git:5.2.1
+workflow-aggregator:596.v8c21c963d92d
+docker-workflow:580.vc0c340686b_54
+credentials-binding:657.v2b_19db_series
+pipeline-stage-view:2.34

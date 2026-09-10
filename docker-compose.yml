@@ -1,0 +1,37 @@
+services:
+  # Local SQL Server for development. Apple Silicon Macs can't run the
+  # standard mcr.microsoft.com/mssql/server image (it's amd64-only), so this
+  # uses Azure SQL Edge instead -- it's SQL-Server-compatible and has a native
+  # arm64 build. If you're on an Intel Mac or Linux, you can swap the image
+  # for mcr.microsoft.com/mssql/server:2022-latest instead.
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    container_name: appointment-booking-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    restart: unless-stopped
+
+  # Jenkins controller for CI. The Docker socket is mounted so pipeline
+  # stages can spin up short-lived dotnet/node build containers via the
+  # Docker Pipeline plugin, instead of needing dotnet/node installed
+  # directly inside the Jenkins image.
+  jenkins:
+    build: ./jenkins
+    container_name: appointment-booking-jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    user: root  # needed so the mounted Docker socket is usable; fine for local/learning use
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:
+  jenkins_home:
