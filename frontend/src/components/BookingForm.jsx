@@ -33,9 +33,6 @@ export default function BookingForm({ services, providers, onBooked }) {
       setForm({ serviceId: '', providerId: '', startTime: '', notes: '' })
       onBooked()
     } catch (err) {
-      // A 409 here specifically means the provider is already booked for
-      // that time slot -- surface the API's message so the user knows to
-      // pick a different time, rather than a generic "something went wrong".
       setError(err.response?.data?.message || 'Failed to book appointment')
     } finally {
       setSubmitting(false)
@@ -52,7 +49,7 @@ export default function BookingForm({ services, providers, onBooked }) {
       <div className="form-row">
         <label>
           Service
-         
+          <select name="serviceId" value={form.serviceId} onChange={handleChange}>
             <option value="">Select a service...</option>
             {services.map((s) => (
               <option key={s.id} value={s.id}>
@@ -64,7 +61,7 @@ export default function BookingForm({ services, providers, onBooked }) {
 
         <label>
           Provider
-        
+          <select name="providerId" value={form.providerId} onChange={handleChange}>
             <option value="">Select a provider...</option>
             {providers.map((p) => (
               <option key={p.id} value={p.id}>
@@ -82,7 +79,6 @@ export default function BookingForm({ services, providers, onBooked }) {
           name="startTime"
           value={form.startTime}
           onChange={handleChange}
-         
         />
       </label>
 
