@@ -52,7 +52,7 @@ export default function BookingForm({ services, providers, onBooked }) {
       <div className="form-row">
         <label>
           Service
-          <select name="serviceId" value={form.serviceId} onChange={handleChange} required>
+         
             <option value="">Select a service...</option>
             {services.map((s) => (
               <option key={s.id} value={s.id}>
@@ -64,7 +64,7 @@ export default function BookingForm({ services, providers, onBooked }) {
 
         <label>
           Provider
-          <select name="providerId" value={form.providerId} onChange={handleChange} required>
+        
             <option value="">Select a provider...</option>
             {providers.map((p) => (
               <option key={p.id} value={p.id}>
@@ -82,7 +82,7 @@ export default function BookingForm({ services, providers, onBooked }) {
           name="startTime"
           value={form.startTime}
           onChange={handleChange}
-          required
+         
         />
       </label>
 
