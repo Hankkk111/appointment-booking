@@ -47,9 +47,12 @@ export default function Dashboard() {
     if (!window.confirm(`Cancel the ${appointment.serviceName} appointment with ${appointment.providerName}?`)) {
       return
     }
+    setErrorMsg('')
     try {
       await api.delete(`/appointments/${appointment.id}`)
-      fetchAppointments()
+      // Awaited so a failed refresh lands in the catch below instead of
+      // becoming an unhandled rejection the user never sees.
+      await fetchAppointments()
     } catch (err) {
       setErrorMsg(err.response?.data?.message || 'Failed to cancel appointment')
     }
