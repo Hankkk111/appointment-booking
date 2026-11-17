@@ -21,6 +21,13 @@ export default function BookingForm({ services, providers, onBooked }) {
       return
     }
 
+    // The API rejects past start times with a 409; catching it here gives
+    // instant feedback instead of a round trip.
+    if (new Date(form.startTime) <= new Date()) {
+      setError('Please choose a start time in the future.')
+      return
+    }
+
     setSubmitting(true)
     try {
       await api.post('/appointments', {

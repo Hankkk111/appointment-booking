@@ -8,6 +8,19 @@ vi.mock('../api/axios')
 const services = [{ id: 1, name: 'Haircut', durationMinutes: 60, price: 45 }]
 const providers = [{ id: 2, name: 'Jane Stylist' }]
 
+// Formats a Date as the local "YYYY-MM-DDTHH:mm" value a datetime-local input holds.
+function toDateTimeLocal(date) {
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+const tomorrowAtTen = () => {
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  d.setHours(10, 0, 0, 0)
+  return toDateTimeLocal(d)
+}
+
 describe('BookingForm', () => {
   beforeEach(() => {
     vi.resetAllMocks()
@@ -31,7 +44,7 @@ describe('BookingForm', () => {
     fireEvent.change(screen.getByLabelText(/service/i), { target: { value: '1' } })
     fireEvent.change(screen.getByLabelText(/provider/i), { target: { value: '2' } })
     fireEvent.change(screen.getByLabelText(/date & time/i), {
-      target: { value: '2026-10-01T10:00' },
+      target: { value: tomorrowAtTen() },
     })
 
     fireEvent.click(screen.getByText('Book Appointment'))
@@ -54,11 +67,29 @@ describe('BookingForm', () => {
     fireEvent.change(screen.getByLabelText(/service/i), { target: { value: '1' } })
     fireEvent.change(screen.getByLabelText(/provider/i), { target: { value: '2' } })
     fireEvent.change(screen.getByLabelText(/date & time/i), {
-      target: { value: '2026-10-01T10:00' },
+      target: { value: tomorrowAtTen() },
     })
 
     fireEvent.click(screen.getByText('Book Appointment'))
 
     expect(await screen.findByText(/already booked for that time slot/i)).toBeInTheDocument()
+  })
+
+  it('rejects a start time in the past without calling the API', async () => {
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    render(<BookingForm services={services} providers={providers} onBooked={vi.fn()} />)
+
+    fireEvent.change(screen.getByLabelText(/service/i), { target: { value: '1' } })
+    fireEvent.change(screen.getByLabelText(/provider/i), { target: { value: '2' } })
+    fireEvent.change(screen.getByLabelText(/date & time/i), {
+      target: { value: toDateTimeLocal(yesterday) },
+    })
+
+    fireEvent.click(screen.getByText('Book Appointment'))
+
+    expect(await screen.findByText(/start time in the future/i)).toBeInTheDocument()
+    expect(api.post).not.toHaveBeenCalled()
   })
 })
